@@ -1,37 +1,42 @@
 use crate::model::Post;
 use anyhow::Result;
-use std::collections::HashMap;
+use r2d2::Pool;
+use redis::{Commands, Client};
 
 #[derive(Clone)]
 pub struct PostRepository {
-    memory_cache: HashMap<i64, Post>,
+    pool: Pool<Client>,
 }
 
 impl PostRepository {
-    pub fn new() -> PostRepository {
-        let memory_cache: HashMap<i64, Post> = HashMap::new();
-        PostRepository { memory_cache }
+    pub fn new(pool:Pool<Client>) -> PostRepository {
+        let conn = pool.get().unwrap();
+        let js = serde_json::to_string(&Post::new(0, "Example", "Alice")).unwrap();
+        conn.set("0", "hogehoge");
+        PostRepository { pool }
     }
 
     pub fn retrieve(&self, id: i64) -> Option<Post> {
-        match self.memory_cache.get(&id) {
-            Some(ref_post) => Some(Post::new(ref_post.id, &ref_post.content, &ref_post.author)),
+        let conn = self.pool.get().unwrap();
+        let resp: Option<String> = conn.get(format!("{}", id)).unwrap();
+        match resp {
+            Some(resp) => {
+                let post: Post = serde_json::from_str(&resp).unwrap();
+                Some(post)                    
+            },
             None => None,
         }
     }
 
     pub fn create(&mut self, post:Post) -> Result<()> {
-        self.memory_cache.insert(post.id, post);
-        Ok(())
+        unimplemented!()
     }
 
     pub fn update(&mut self, post:Post) -> Result<()> {
-        self.memory_cache.insert(post.id, post);
-        Ok(())
+        unimplemented!()
     }
 
     pub fn delete(&mut self, post:Post) -> Result<()> {
-        self.memory_cache.remove(&post.id);
-        Ok(())
+        unimplemented!()
     }
 }

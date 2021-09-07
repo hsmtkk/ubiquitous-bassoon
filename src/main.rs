@@ -3,13 +3,17 @@ mod model;
 mod post_repo;
 
 use actix_web::{App, HttpServer};
+use r2d2::Pool;
+use redis::Client;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let addr = get_address();
-    let port = get_port();
-    let bind_addr = format!("{}:{}", addr, port);
-    let repo = post_repo::PostRepository::new();
+    let listen_address = get_listen_address();
+    let redis_host = get_redis_host();
+    let client = Client::open(redis_host).unwrap();
+    let pool = Pool::builder().build(client).unwrap();
+    let repo = post_repo::PostRepository::new(pool);
+
     HttpServer::new(move || {
         App::new()
             .data(repo.clone())
@@ -18,26 +22,18 @@ async fn main() -> std::io::Result<()> {
             .service(handle::handle_put)
             .service(handle::handle_delete)
     })
-    .bind(bind_addr)?
+    .bind(listen_address)?
     .run()
     .await
 }
 
-fn get_address() -> String {
+fn get_listen_address() -> String {
     match std::env::var("LISTEN_ADDRESS") {
         Ok(addr) => addr,
-        Err(_e) => "0.0.0.0".to_string(),
+        Err(_e) => "0.0.0.0:8000".to_string(),
     }
 }
 
-const DEFAULT_PORT: u16 = 8000;
-
-fn get_port() -> u16 {
-    match std::env::var("LISTEN_PORT") {
-        Ok(port_str) => match port_str.parse::<u16>() {
-            Ok(port) => port,
-            Err(_e) => DEFAULT_PORT,
-        },
-        Err(_e) => DEFAULT_PORT,
-    }
+fn get_redis_host() -> String {
+    std::env::var("REDIS_HOST").expect("environment variable REDIS_HOST must be defined")
 }
