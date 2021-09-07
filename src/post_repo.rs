@@ -1,9 +1,8 @@
 use crate::model::Post;
-use anyhow::Result;
 use r2d2::Pool;
 use redis::{Commands, Client};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PostRepository {
     pool: Pool<Client>,
 }
@@ -11,7 +10,8 @@ pub struct PostRepository {
 impl PostRepository {
     pub fn new(pool:Pool<Client>) -> PostRepository {
         let mut conn = pool.get().unwrap();
-        let js = serde_json::to_string(&Post::new(0, "Example", "Alice")).unwrap();
+        let sample_post = Post::new(0, "Example", "Alice");
+        let js = serde_json::to_string(&sample_post).unwrap();
         let _:() = conn.set(0, js).unwrap();
         PostRepository { pool }
     }
@@ -26,23 +26,20 @@ impl PostRepository {
         Some(post)
     }
 
-    pub fn create(&mut self, post:Post) -> Result<()> {
+    pub fn create(&self, post:Post) {
         let mut conn = self.pool.get().unwrap();
         let js = serde_json::to_string(&post).unwrap();
         let _:() = conn.set(post.id, js).unwrap();
-        Ok(())
     }
 
-    pub fn update(&mut self, post:Post) -> Result<()> {
+    pub fn update(&self, post:Post)  {
         let mut conn = self.pool.get().unwrap();
         let js = serde_json::to_string(&post).unwrap();
         let _:() = conn.set(post.id, js).unwrap();
-        Ok(())
     }
 
-    pub fn delete(&mut self, id:i64) -> Result<()> {
+    pub fn delete(&self, id:i64)  {
         let mut conn = self.pool.get().unwrap();
         let _: () = conn.del(id).unwrap();
-        Ok(())
     }
 }

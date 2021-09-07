@@ -5,7 +5,7 @@ import "google/protobuf/empty.proto";
 
 service Poster {
   rpc GetPost(GetRequest) returns (GetReply);
-//  rpc DeletePost(DeleteRequest) returns (google.protobuf.Empty);
+  rpc DeletePost(DeleteRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -25,5 +25,3 @@ message GetReply {
 message DeleteRequest {
   int64 id = 1;
 }
-
-
