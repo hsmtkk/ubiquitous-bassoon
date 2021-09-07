@@ -15,19 +15,22 @@ pub async fn handle_get(path: Path<(u32,)>, repo: Data<PostRepository>) -> impl 
 
 #[post("/post/{id}")]
 pub async fn handle_post(path: Path<(u32,)>, repo: Data<PostRepository>) -> impl Responder {
-    let id = path.into_inner().0;
+    let id:i64 = path.into_inner().0.into();
     debug!("post {}", id);
     HttpResponse::Ok().body("post")
 }
 
 #[put("/post")]
 pub async fn handle_put(path: Path<(u32,)>, repo: Data<PostRepository>) -> impl Responder {
-    let id = path.into_inner().0;
+    let id:i64 = path.into_inner().0.into();
     debug!("put {}", id);
     HttpResponse::Ok().body("post")
 }
 
 #[delete("/post")]
 pub async fn handle_delete(path: Path<(u32,)>, repo: Data<PostRepository>) -> impl Responder {
+    let id:i64 = path.into_inner().0.into();
+    debug!("delete {}", id);
+    repo.delete(id);
     HttpResponse::Ok().body("delete")
 }

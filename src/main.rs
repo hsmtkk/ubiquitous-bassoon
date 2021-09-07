@@ -10,7 +10,7 @@ use redis::Client;
 async fn main() -> std::io::Result<()> {
     let listen_address = get_listen_address();
     let redis_host = get_redis_host();
-    let client = Client::open(redis_host).unwrap();
+    let client = Client::open(format!("redis://{}", redis_host)).unwrap();
     let pool = Pool::builder().build(client).unwrap();
     let repo = post_repo::PostRepository::new(pool);
 
