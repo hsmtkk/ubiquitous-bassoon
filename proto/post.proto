@@ -1,0 +1,29 @@
+syntax = "proto3";
+package post;
+
+import "google/protobuf/empty.proto";
+
+service Poster {
+  rpc GetPost(GetRequest) returns (GetReply);
+//  rpc DeletePost(DeleteRequest) returns (google.protobuf.Empty);
+}
+
+message Post {
+  int64 id = 1;
+  string content = 2;
+  string author = 3;
+}
+
+message GetRequest {
+  int64 id = 1;
+}
+
+message GetReply {
+  Post post = 1;
+}
+
+message DeleteRequest {
+  int64 id = 1;
+}
+
+
