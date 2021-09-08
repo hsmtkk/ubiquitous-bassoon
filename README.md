@@ -1,2 +1,2 @@
 # ubiquitous-bassoon
-Rust JSON posting web service
+Rust gRPC with redis backend
